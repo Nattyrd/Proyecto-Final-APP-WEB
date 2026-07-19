@@ -25,22 +25,36 @@ const docTemplate = `{
     "paths": {
         "/products": {
             "get": {
-                "description": "Obtiene todos los productos disponibles",
+                "description": "Obtiene los productos con soporte de paginaci\u00f3n. Si no se especifican par\u00e1metros, se devuelven los primeros 10 resultados.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "products"
                 ],
-                "summary": "Listar productos",
+                "summary": "Listar productos (paginado)",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "N\u00famero de p\u00e1gina (defecto: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Resultados por p\u00e1gina (defecto: 10, m\u00e1ximo: 100)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ProductResponse"
-                            }
+                            "$ref": "#/definitions/dto.PaginatedProductsResponse"
                         }
                     },
                     "500": {
@@ -1047,7 +1061,48 @@ const docTemplate = `{
                 },
                 "stock": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Nuevo stock. Si no se env\u00eda, el stock no cambia."
+                }
+            }
+        },
+        "dto.PaginatedProductsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalItems": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apperrors.ValidationErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

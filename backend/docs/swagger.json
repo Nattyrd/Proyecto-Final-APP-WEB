@@ -19,22 +19,36 @@
     "paths": {
         "/products": {
             "get": {
-                "description": "Obtiene todos los productos disponibles",
+                "description": "Obtiene los productos con soporte de paginación mediante query params. Si no se especifican, se devuelven los primeros 10 resultados.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "products"
                 ],
-                "summary": "Listar productos",
+                "summary": "Listar productos (paginado)",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Número de página (defecto: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Resultados por página (defecto: 10, máximo: 100)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ProductResponse"
-                            }
+                            "$ref": "#/definitions/dto.PaginatedProductsResponse"
                         }
                     },
                     "500": {
@@ -1024,6 +1038,53 @@
                 }
             }
         },
+        "dto.PaginatedProductsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "pageSize": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "totalItems": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "totalPages": {
+                    "type": "integer",
+                    "example": 5
+                }
+            }
+        },
+        "apperrors.ValidationErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "BAD_REQUEST"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Error de validación en los datos enviados"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": ["Username: es obligatorio", "Email: debe ser un correo electrónico válido"]
+                }
+            }
+        },
         "dto.UpdateProductRequest": {
             "type": "object",
             "properties": {
@@ -1041,7 +1102,8 @@
                 },
                 "stock": {
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "Nuevo stock. Si no se envía, el stock no cambia."
                 }
             }
         },

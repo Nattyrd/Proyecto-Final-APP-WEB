@@ -1,4 +1,7 @@
 services:
+  # ─────────────────────────────────────────────
+  # Base de datos PostgreSQL
+  # ─────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: ecommerce-postgres
@@ -8,7 +11,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ecommerce
     ports:
-      - "5432:5432"
+      - "5433:5432" # <-- AQUÍ va el 5433 para que no pelee con tu PostgreSQL de Windows
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -17,6 +20,45 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - ecommerce-net
+
+  # ─────────────────────────────────────────────
+  # API Go (Gin + GORM)
+  # ─────────────────────────────────────────────
+  api:
+    image: golang:1.26-alpine
+    container_name: ecommerce-api
+    working_dir: /app
+    volumes:
+      - .:/app
+      # Cache de módulos Go (evita re-descargar en cada restart)
+      - go_modules:/go/pkg/mod
+    environment:
+      APP_PORT: "8080"
+      APP_ENV: development
+      DB_HOST: postgres
+      DB_PORT: "5432" # <-- Dentro de la red de Docker, la API usa el puerto interno 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: ecommerce
+      DB_SSLMODE: disable
+      JWT_SECRET: grupo5-super-secret-key-change-in-production
+      JWT_EXPIRATION_HOURS: "24"
+    ports:
+      - "8080:8080" # <-- La API expone el puerto 8080 para que puedas ver el Swagger
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: go run ./cmd/api
+    networks:
+      - ecommerce-net
+    restart: on-failure
 
 volumes:
   postgres_data:
+  go_modules:
+
+networks:
+  ecommerce-net:
+    driver: bridge

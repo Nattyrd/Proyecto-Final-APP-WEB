@@ -23,3 +23,11 @@ type ProductResponse struct {
 	Price       decimal.Decimal `json:"price"`
 	Stock       int             `json:"stock"`
 }
+
+type PaginatedProductsResponse struct {
+	Data       []ProductResponse `json:"data"`
+	Page       int               `json:"page"`
+	PageSize   int               `json:"pageSize"`
+	TotalItems int64             `json:"totalItems"`
+	TotalPages int               `json:"totalPages"`
+}

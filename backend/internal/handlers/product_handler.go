@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/grupo5/ecommerce-api/internal/apperrors"
@@ -19,7 +20,7 @@ func NewProductHandler(productService *service.ProductService) *ProductHandler {
 
 // Create godoc
 // @Summary      Crear producto
-// @Description  Registra un nuevo producto en el catalogo
+// @Description  Registra un nuevo producto en el catálogo
 // @Tags         products
 // @Accept       json
 // @Produce      json
@@ -47,21 +48,26 @@ func (h *ProductHandler) Create(c *gin.Context) {
 }
 
 // GetAll godoc
-// @Summary      Listar productos
-// @Description  Obtiene todos los productos disponibles
+// @Summary      Listar productos (paginado)
+// @Description  Obtiene los productos con soporte de paginación mediante query params. Si no se especifican, se devuelven los primeros 10 resultados.
 // @Tags         products
 // @Produce      json
-// @Success      200 {array} dto.ProductResponse
+// @Param        page      query int false "Número de página (defecto: 1)"      minimum(1)
+// @Param        pageSize  query int false "Resultados por página (defecto: 10, máximo: 100)" minimum(1) maximum(100)
+// @Success      200 {object} dto.PaginatedProductsResponse
 // @Failure      500 {object} apperrors.ErrorResponse
 // @Router       /products [get]
 func (h *ProductHandler) GetAll(c *gin.Context) {
-	products, err := h.productService.GetAll(c.Request.Context())
+	page := parseIntQuery(c, "page", 1)
+	pageSize := parseIntQuery(c, "pageSize", 10)
+
+	result, err := h.productService.GetAllPaginated(c.Request.Context(), page, pageSize)
 	if err != nil {
 		apperrors.Abort(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, products)
+	c.JSON(http.StatusOK, result)
 }
 
 // GetByID godoc
@@ -93,7 +99,7 @@ func (h *ProductHandler) GetByID(c *gin.Context) {
 
 // Update godoc
 // @Summary      Actualizar producto
-// @Description  Modifica los datos de un producto existente
+// @Description  Modifica los datos de un producto existente. Solo los campos enviados son modificados.
 // @Tags         products
 // @Accept       json
 // @Produce      json
@@ -130,7 +136,7 @@ func (h *ProductHandler) Update(c *gin.Context) {
 
 // Delete godoc
 // @Summary      Eliminar producto
-// @Description  Elimina un producto del catalogo
+// @Description  Elimina un producto del catálogo
 // @Tags         products
 // @Produce      json
 // @Security     BearerAuth
@@ -154,4 +160,17 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// parseIntQuery lee un query param como entero con un fallback.
+func parseIntQuery(c *gin.Context, name string, fallback int) int {
+	raw := c.Query(name)
+	if raw == "" {
+		return fallback
+	}
+	val, err := strconv.Atoi(raw)
+	if err != nil || val <= 0 {
+		return fallback
+	}
+	return val
 }

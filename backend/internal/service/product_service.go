@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"math"
 
 	"github.com/grupo5/ecommerce-api/internal/apperrors"
 	"github.com/grupo5/ecommerce-api/internal/dto"
@@ -11,6 +12,12 @@ import (
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
+
+// DefaultPageSize es el tamaño de página por defecto si el cliente no lo especifica.
+const DefaultPageSize = 10
+
+// MaxPageSize es el máximo permitido para evitar consultas masivas.
+const MaxPageSize = 100
 
 type ProductService struct {
 	productRepo *repository.ProductRepository
@@ -40,6 +47,44 @@ func (s *ProductService) Create(ctx context.Context, req dto.CreateProductReques
 	return &response, nil
 }
 
+// GetAllPaginated devuelve los productos con soporte de paginación.
+// page y pageSize son opcionales; si son <= 0 se usan los valores por defecto.
+func (s *ProductService) GetAllPaginated(ctx context.Context, page, pageSize int) (*dto.PaginatedProductsResponse, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = DefaultPageSize
+	}
+	if pageSize > MaxPageSize {
+		pageSize = MaxPageSize
+	}
+
+	products, total, err := s.productRepo.FindPaginated(ctx, page, pageSize)
+	if err != nil {
+		return nil, apperrors.Internal("No se pudo listar los productos")
+	}
+
+	responses := make([]dto.ProductResponse, 0, len(products))
+	for i := range products {
+		responses = append(responses, toProductResponse(&products[i]))
+	}
+
+	totalPages := int(math.Ceil(float64(total) / float64(pageSize)))
+	if totalPages == 0 {
+		totalPages = 1
+	}
+
+	return &dto.PaginatedProductsResponse{
+		Data:       responses,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalItems: total,
+		TotalPages: totalPages,
+	}, nil
+}
+
+// GetAll devuelve todos los productos sin paginación (conservado por compatibilidad interna).
 func (s *ProductService) GetAll(ctx context.Context) ([]dto.ProductResponse, error) {
 	products, err := s.productRepo.FindAll(ctx)
 	if err != nil {
@@ -88,8 +133,10 @@ func (s *ProductService) Update(ctx context.Context, id uint, req dto.UpdateProd
 		}
 		product.Price = req.Price
 	}
-	if req.Stock >= 0 {
-		product.Stock = req.Stock
+	// FIX: Se usa *int para detectar si el campo fue enviado o no.
+	// Si req.Stock == nil, el cliente no envió el campo → no se modifica.
+	if req.Stock != nil {
+		product.Stock = *req.Stock
 	}
 
 	if err := s.productRepo.Update(ctx, product); err != nil {

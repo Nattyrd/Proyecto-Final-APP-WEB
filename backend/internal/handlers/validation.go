@@ -26,16 +26,22 @@ func validationMessage(fieldErr validator.FieldError) string {
 	case "required":
 		return "es obligatorio"
 	case "email":
-		return "debe ser un correo valido"
+		return "debe ser un correo electrónico válido"
 	case "min":
 		return fmt.Sprintf("debe tener al menos %s caracteres", fieldErr.Param())
 	case "max":
-		return fmt.Sprintf("debe tener maximo %s caracteres", fieldErr.Param())
+		return fmt.Sprintf("debe tener máximo %s caracteres", fieldErr.Param())
 	case "gt":
 		return fmt.Sprintf("debe ser mayor a %s", fieldErr.Param())
 	case "gte":
 		return fmt.Sprintf("debe ser mayor o igual a %s", fieldErr.Param())
+	case "lt":
+		return fmt.Sprintf("debe ser menor a %s", fieldErr.Param())
+	case "lte":
+		return fmt.Sprintf("debe ser menor o igual a %s", fieldErr.Param())
+	case "dive":
+		return "contiene un elemento inválido"
 	default:
-		return "valor invalido"
+		return fmt.Sprintf("valor inválido (regla: %s)", fieldErr.Tag())
 	}
 }
