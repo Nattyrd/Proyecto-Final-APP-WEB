@@ -13,7 +13,7 @@ type UpdateProductRequest struct {
 	Name        string          `json:"name" binding:"omitempty,min=2,max=120"`
 	Description string          `json:"description" binding:"omitempty,max=500"`
 	Price       decimal.Decimal `json:"price" binding:"omitempty"`
-	Stock       int             `json:"stock" binding:"omitempty,gte=0"`
+	Stock       *int            `json:"stock" binding:"omitempty,gte=0"`
 }
 
 type ProductResponse struct {
