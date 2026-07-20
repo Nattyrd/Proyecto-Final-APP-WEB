@@ -19,6 +19,7 @@ type Config struct {
 	DBSSLMode          string
 	JWTSecret          string
 	JWTExpirationHours int
+	AdminSecret        string // clave para crear usuarios ADMIN (leída de ADMIN_SECRET)
 }
 
 func Load() (*Config, error) {
@@ -40,6 +41,7 @@ func Load() (*Config, error) {
 		DBSSLMode:          getEnv("DB_SSLMODE", "disable"),
 		JWTSecret:          getEnv("JWT_SECRET", "grupo5-super-secret-key-change-in-production"),
 		JWTExpirationHours: expirationHours,
+		AdminSecret:        getEnv("ADMIN_SECRET", ""), // sin fallback: si no está en .env, nadie puede ser ADMIN
 	}, nil
 }
 

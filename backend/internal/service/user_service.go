@@ -16,12 +16,14 @@ import (
 type UserService struct {
 	userRepo     *repository.UserRepository
 	tokenService *auth.TokenService
+	adminSecret  string // leído desde ADMIN_SECRET en .env
 }
 
-func NewUserService(userRepo *repository.UserRepository, tokenService *auth.TokenService) *UserService {
+func NewUserService(userRepo *repository.UserRepository, tokenService *auth.TokenService, adminSecret string) *UserService {
 	return &UserService{
 		userRepo:     userRepo,
 		tokenService: tokenService,
+		adminSecret:  adminSecret,
 	}
 }
 
@@ -47,19 +49,26 @@ func (s *UserService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 		return nil, apperrors.Internal("No se pudo cifrar la contrasena")
 	}
 
+	// Asignar rol ADMIN solo si el secret coincide con el de .env y no está vacío.
+	role := models.RoleClient
+	if s.adminSecret != "" && req.AdminSecret == s.adminSecret {
+		role = models.RoleAdmin
+	}
+
 	user := &models.User{
 		Username:  req.Username,
 		Email:     req.Email,
 		Password:  string(hashedPassword),
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
+		Role:      role,
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, apperrors.Internal("No se pudo registrar el usuario")
 	}
 
-	token, err := s.tokenService.Generate(user.ID, user.Username)
+	token, err := s.tokenService.Generate(user.ID, user.Username, user.Role)
 	if err != nil {
 		return nil, apperrors.Internal("No se pudo generar el token")
 	}
@@ -83,7 +92,7 @@ func (s *UserService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Aut
 		return nil, apperrors.Unauthorized("Credenciales invalidas")
 	}
 
-	token, err := s.tokenService.Generate(user.ID, user.Username)
+	token, err := s.tokenService.Generate(user.ID, user.Username, user.Role)
 	if err != nil {
 		return nil, apperrors.Internal("No se pudo generar el token")
 	}
@@ -171,5 +180,6 @@ func toUserResponse(user *models.User) dto.UserResponse {
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
+		Role:      user.Role,
 	}
 }

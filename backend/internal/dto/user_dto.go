@@ -1,11 +1,12 @@
 package dto
 
 type RegisterRequest struct {
-	Username  string `json:"username" binding:"required,min=3,max=50"`
-	Email     string `json:"email" binding:"required,email,max=120"`
-	Password  string `json:"password" binding:"required,min=6,max=72"`
-	FirstName string `json:"firstName" binding:"required,min=2,max=80"`
-	LastName  string `json:"lastName" binding:"required,min=2,max=80"`
+	Username    string `json:"username" binding:"required,min=3,max=50"`
+	Email       string `json:"email" binding:"required,email,max=120"`
+	Password    string `json:"password" binding:"required,min=6,max=72"`
+	FirstName   string `json:"firstName" binding:"required,min=2,max=80"`
+	LastName    string `json:"lastName" binding:"required,min=2,max=80"`
+	AdminSecret string `json:"adminSecret"` // opcional; si coincide con la constante crea ADMIN
 }
 
 type LoginRequest struct {
@@ -31,4 +32,5 @@ type UserResponse struct {
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
+	Role      string `json:"role"` // "CLIENT" o "ADMIN"
 }

@@ -33,6 +33,7 @@ func Setup(deps Dependencies) *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	authMiddleware := middleware.JWTAuth(deps.TokenService)
+	adminMiddleware := middleware.RequireAdmin() // sólo ADMIN puede escribir productos
 
 	api := router.Group("/api")
 	{
@@ -47,11 +48,14 @@ func Setup(deps Dependencies) *gin.Engine {
 
 		products := api.Group("/products")
 		{
+			// Lectura pública (sin token)
 			products.GET("", deps.ProductHandler.GetAll)
 			products.GET("/:id", deps.ProductHandler.GetByID)
-			products.POST("", authMiddleware, deps.ProductHandler.Create)
-			products.PUT("/:id", authMiddleware, deps.ProductHandler.Update)
-			products.DELETE("/:id", authMiddleware, deps.ProductHandler.Delete)
+
+			// Escritura: primero autenticar (JWT), luego verificar rol ADMIN
+			products.POST("", authMiddleware, adminMiddleware, deps.ProductHandler.Create)
+			products.PUT("/:id", authMiddleware, adminMiddleware, deps.ProductHandler.Update)
+			products.DELETE("/:id", authMiddleware, adminMiddleware, deps.ProductHandler.Delete)
 		}
 
 		receipts := api.Group("/receipts")

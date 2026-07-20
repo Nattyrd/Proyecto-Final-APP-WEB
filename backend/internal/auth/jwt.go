@@ -8,9 +8,11 @@ import (
 	"github.com/grupo5/ecommerce-api/internal/config"
 )
 
+// Claims contiene el payload del token JWT.
 type Claims struct {
 	UserID   uint   `json:"userId"`
 	Username string `json:"username"`
+	Role     string `json:"role"` // "CLIENT" o "ADMIN"
 	jwt.RegisteredClaims
 }
 
@@ -26,10 +28,12 @@ func NewTokenService(cfg *config.Config) *TokenService {
 	}
 }
 
-func (s *TokenService) Generate(userID uint, username string) (string, error) {
+// Generate crea un token JWT firmado que incluye el rol del usuario.
+func (s *TokenService) Generate(userID uint, username, role string) (string, error) {
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.expiration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -40,6 +44,7 @@ func (s *TokenService) Generate(userID uint, username string) (string, error) {
 	return token.SignedString(s.secret)
 }
 
+// Validate parsea y verifica la firma del token, devolviendo los claims.
 func (s *TokenService) Validate(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if token.Method != jwt.SigningMethodHS256 {

@@ -48,7 +48,7 @@ func main() {
 	receiptRepo := repository.NewReceiptRepository(db)
 
 	tokenService := auth.NewTokenService(cfg)
-	userService := service.NewUserService(userRepo, tokenService)
+	userService := service.NewUserService(userRepo, tokenService, cfg.AdminSecret)
 	productService := service.NewProductService(productRepo)
 	receiptService := service.NewReceiptService(receiptRepo, productRepo, userRepo)
 
