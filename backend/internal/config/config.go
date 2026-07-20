@@ -2,7 +2,9 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -22,8 +24,36 @@ type Config struct {
 	AdminSecret        string // clave para crear usuarios ADMIN (leída de ADMIN_SECRET)
 }
 
+// findEnvFile busca el archivo .env subiendo desde el directorio de trabajo
+// hasta encontrarlo o agotar los niveles de búsqueda.
+func findEnvFile() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return ".env"
+	}
+	for {
+		candidate := filepath.Join(dir, ".env")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Llegamos a la raíz del sistema de archivos sin encontrar .env
+			break
+		}
+		dir = parent
+	}
+	return ".env" // fallback
+}
+
 func Load() (*Config, error) {
-	_ = godotenv.Load()
+	envPath := findEnvFile()
+	if err := godotenv.Load(envPath); err != nil {
+		log.Printf("[WARN] No se pudo cargar el archivo .env desde '%s': %v", envPath, err)
+		log.Println("[WARN] Se usarán variables de entorno del sistema o valores por defecto")
+	} else {
+		log.Printf("[INFO] Variables de entorno cargadas desde: %s", envPath)
+	}
 
 	expirationHours, err := strconv.Atoi(getEnv("JWT_EXPIRATION_HOURS", "24"))
 	if err != nil {

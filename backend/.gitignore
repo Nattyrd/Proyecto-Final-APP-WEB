@@ -3,6 +3,8 @@ bin/
 *.exe
 
 # Entorno
+.env
+# .env.example se sube a Git a propósito (es la plantilla sin secretos)
 
 
 # IDE
