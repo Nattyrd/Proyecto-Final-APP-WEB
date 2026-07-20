@@ -65,7 +65,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Registra un nuevo producto en el catalogo",
+                "description": "Registra un nuevo producto en el catálogo",
                 "consumes": [
                     "application/json"
                 ],
@@ -167,7 +167,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Modifica los datos de un producto existente",
+                "description": "Modifica los datos de un producto existente. Solo los campos enviados son modificados.",
                 "consumes": [
                     "application/json"
                 ],
@@ -235,7 +235,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Elimina un producto del catalogo",
+                "description": "Elimina un producto del catálogo",
                 "produces": [
                     "application/json"
                 ],
@@ -556,6 +556,40 @@
                 }
             }
         },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Consulta la lista de todos los usuarios (solo ADMIN)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Obtener todos los usuarios",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/login": {
             "post": {
                 "description": "Autentica un usuario y devuelve un token JWT",
@@ -846,10 +880,12 @@
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NOT_FOUND"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Recurso no encontrado"
                 }
             }
         },
@@ -939,6 +975,29 @@
                 }
             }
         },
+        "dto.PaginatedProductsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalItems": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ProductResponse": {
             "type": "object",
             "properties": {
@@ -1012,6 +1071,10 @@
                 "username"
             ],
             "properties": {
+                "adminSecret": {
+                    "description": "opcional; si coincide con la constante crea ADMIN",
+                    "type": "string"
+                },
                 "email": {
                     "type": "string",
                     "maxLength": 120
@@ -1038,53 +1101,6 @@
                 }
             }
         },
-        "dto.PaginatedProductsResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.ProductResponse"
-                    }
-                },
-                "page": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "pageSize": {
-                    "type": "integer",
-                    "example": 10
-                },
-                "totalItems": {
-                    "type": "integer",
-                    "example": 42
-                },
-                "totalPages": {
-                    "type": "integer",
-                    "example": 5
-                }
-            }
-        },
-        "apperrors.ValidationErrorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "example": "BAD_REQUEST"
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Error de validación en los datos enviados"
-                },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": ["Username: es obligatorio", "Email: debe ser un correo electrónico válido"]
-                }
-            }
-        },
         "dto.UpdateProductRequest": {
             "type": "object",
             "properties": {
@@ -1102,8 +1118,7 @@
                 },
                 "stock": {
                     "type": "integer",
-                    "minimum": 0,
-                    "description": "Nuevo stock. Si no se envía, el stock no cambia."
+                    "minimum": 0
                 }
             }
         },
@@ -1128,6 +1143,9 @@
                     "type": "string",
                     "maxLength": 72,
                     "minLength": 6
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -1144,6 +1162,10 @@
                     "type": "integer"
                 },
                 "lastName": {
+                    "type": "string"
+                },
+                "role": {
+                    "description": "\"CLIENT\" o \"ADMIN\"",
                     "type": "string"
                 },
                 "username": {

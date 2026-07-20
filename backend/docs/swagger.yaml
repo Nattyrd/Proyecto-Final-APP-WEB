@@ -3,53 +3,18 @@ definitions:
   apperrors.ErrorResponse:
     properties:
       code:
-        type: string
         example: NOT_FOUND
-      message:
         type: string
+      message:
         example: Recurso no encontrado
-    type: object
-  apperrors.ValidationErrorResponse:
-    properties:
-      code:
         type: string
-        example: BAD_REQUEST
-      message:
-        type: string
-        example: Error de validación en los datos enviados
-      details:
-        type: array
-        items:
-          type: string
-        example:
-          - "Username: es obligatorio"
-          - "Email: debe ser un correo electrónico válido"
-    type: object
-  dto.PaginatedProductsResponse:
-    properties:
-      data:
-        items:
-          $ref: "#/definitions/dto.ProductResponse"
-        type: array
-      page:
-        type: integer
-        example: 1
-      pageSize:
-        type: integer
-        example: 10
-      totalItems:
-        type: integer
-        example: 42
-      totalPages:
-        type: integer
-        example: 5
     type: object
   dto.AuthResponse:
     properties:
       token:
         type: string
       user:
-        $ref: "#/definitions/dto.UserResponse"
+        $ref: '#/definitions/dto.UserResponse'
     type: object
   dto.CreateProductRequest:
     properties:
@@ -66,9 +31,9 @@ definitions:
         minimum: 0
         type: integer
     required:
-      - name
-      - price
-      - stock
+    - name
+    - price
+    - stock
     type: object
   dto.CreateReceiptItemRequest:
     properties:
@@ -77,21 +42,21 @@ definitions:
       quantity:
         type: integer
     required:
-      - productId
-      - quantity
+    - productId
+    - quantity
     type: object
   dto.CreateReceiptRequest:
     properties:
       items:
         items:
-          $ref: "#/definitions/dto.CreateReceiptItemRequest"
+          $ref: '#/definitions/dto.CreateReceiptItemRequest'
         minItems: 1
         type: array
       userId:
         type: integer
     required:
-      - items
-      - userId
+    - items
+    - userId
     type: object
   dto.LoginRequest:
     properties:
@@ -100,8 +65,23 @@ definitions:
       username:
         type: string
     required:
-      - password
-      - username
+    - password
+    - username
+    type: object
+  dto.PaginatedProductsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.ProductResponse'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalItems:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   dto.ProductResponse:
     properties:
@@ -137,7 +117,7 @@ definitions:
         type: integer
       items:
         items:
-          $ref: "#/definitions/dto.ReceiptItemResponse"
+          $ref: '#/definitions/dto.ReceiptItemResponse'
         type: array
       total:
         type: number
@@ -146,6 +126,9 @@ definitions:
     type: object
   dto.RegisterRequest:
     properties:
+      adminSecret:
+        description: opcional; si coincide con la constante crea ADMIN
+        type: string
       email:
         maxLength: 120
         type: string
@@ -166,11 +149,11 @@ definitions:
         minLength: 3
         type: string
     required:
-      - email
-      - firstName
-      - lastName
-      - password
-      - username
+    - email
+    - firstName
+    - lastName
+    - password
+    - username
     type: object
   dto.UpdateProductRequest:
     properties:
@@ -204,6 +187,8 @@ definitions:
         maxLength: 72
         minLength: 6
         type: string
+      role:
+        type: string
     type: object
   dto.UserResponse:
     properties:
@@ -215,6 +200,9 @@ definitions:
         type: integer
       lastName:
         type: string
+      role:
+        description: '"CLIENT" o "ADMIN"'
+        type: string
       username:
         type: string
     type: object
@@ -223,8 +211,7 @@ info:
   contact:
     email: grupo5@epn.edu.ec
     name: Grupo 5 - Aplicaciones Web
-  description:
-    API RESTful de e-commerce desarrollada con Go, Gin, GORM, PostgreSQL
+  description: API RESTful de e-commerce desarrollada con Go, Gin, GORM, PostgreSQL
     y JWT.
   license:
     name: MIT
@@ -235,539 +222,562 @@ info:
 paths:
   /products:
     get:
-      description: Obtiene los productos con soporte de paginación. Si no se especifican parámetros, se devuelven los primeros 10 resultados.
+      description: Obtiene los productos con soporte de paginación mediante query
+        params. Si no se especifican, se devuelven los primeros 10 resultados.
       parameters:
-        - description: "Número de página (defecto: 1)"
-          in: query
-          minimum: 1
-          name: page
-          type: integer
-        - description: "Resultados por página (defecto: 10, máximo: 100)"
-          in: query
-          maximum: 100
-          minimum: 1
-          name: pageSize
-          type: integer
+      - description: 'Número de página (defecto: 1)'
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: 'Resultados por página (defecto: 10, máximo: 100)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: pageSize
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.PaginatedProductsResponse"
+            $ref: '#/definitions/dto.PaginatedProductsResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       summary: Listar productos (paginado)
       tags:
-        - products
+      - products
     post:
       consumes:
-        - application/json
-      description: Registra un nuevo producto en el catalogo
+      - application/json
+      description: Registra un nuevo producto en el catálogo
       parameters:
-        - description: Datos del producto
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/dto.CreateProductRequest"
+      - description: Datos del producto
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: "#/definitions/dto.ProductResponse"
+            $ref: '#/definitions/dto.ProductResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Crear producto
       tags:
-        - products
+      - products
   /products/{id}:
     delete:
-      description: Elimina un producto del catalogo
+      description: Elimina un producto del catálogo
       parameters:
-        - description: ID del producto
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: ID del producto
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "204":
           description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Eliminar producto
       tags:
-        - products
+      - products
     get:
       description: Consulta un producto por su identificador
       parameters:
-        - description: ID del producto
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: ID del producto
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.ProductResponse"
+            $ref: '#/definitions/dto.ProductResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       summary: Obtener producto por ID
       tags:
-        - products
+      - products
     put:
       consumes:
-        - application/json
-      description: Modifica los datos de un producto existente
+      - application/json
+      description: Modifica los datos de un producto existente. Solo los campos enviados
+        son modificados.
       parameters:
-        - description: ID del producto
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: Datos a actualizar
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/dto.UpdateProductRequest"
+      - description: ID del producto
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProductRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.ProductResponse"
+            $ref: '#/definitions/dto.ProductResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Actualizar producto
       tags:
-        - products
+      - products
   /receipts:
     get:
       description: Obtiene todos los recibos registrados
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/dto.ReceiptResponse"
+              $ref: '#/definitions/dto.ReceiptResponse'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Listar recibos
       tags:
-        - receipts
+      - receipts
     post:
       consumes:
-        - application/json
+      - application/json
       description: Procesa una compra, calcula el total en backend y descuenta stock
       parameters:
-        - description: Datos de la compra
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/dto.CreateReceiptRequest"
+      - description: Datos de la compra
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateReceiptRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: "#/definitions/dto.ReceiptResponse"
+            $ref: '#/definitions/dto.ReceiptResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Crear recibo
       tags:
-        - receipts
+      - receipts
   /receipts/{id}:
     delete:
       description: Elimina un recibo existente
       parameters:
-        - description: ID del recibo
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: ID del recibo
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "204":
           description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Eliminar recibo
       tags:
-        - receipts
+      - receipts
     get:
       description: Consulta un recibo con sus items
       parameters:
-        - description: ID del recibo
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: ID del recibo
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.ReceiptResponse"
+            $ref: '#/definitions/dto.ReceiptResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Obtener recibo por ID
       tags:
-        - receipts
+      - receipts
   /receipts/user/{userId}:
     get:
       description: Obtiene los recibos asociados a un usuario
       parameters:
-        - description: ID del usuario
-          in: path
-          name: userId
-          required: true
-          type: integer
+      - description: ID del usuario
+        in: path
+        name: userId
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: "#/definitions/dto.ReceiptResponse"
+              $ref: '#/definitions/dto.ReceiptResponse'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Listar recibos por usuario
       tags:
-        - receipts
+      - receipts
+  /users:
+    get:
+      description: Consulta la lista de todos los usuarios (solo ADMIN)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apperrors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Obtener todos los usuarios
+      tags:
+      - users
   /users/{id}:
     delete:
       description: Elimina un usuario autenticado
       parameters:
-        - description: ID del usuario
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "204":
           description: No Content
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Eliminar usuario
       tags:
-        - users
+      - users
     get:
       description: Consulta los datos de un usuario (sin contrasena)
       parameters:
-        - description: ID del usuario
-          in: path
-          name: id
-          required: true
-          type: integer
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.UserResponse"
+            $ref: '#/definitions/dto.UserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       summary: Obtener usuario por ID
       tags:
-        - users
+      - users
     put:
       consumes:
-        - application/json
+      - application/json
       description: Actualiza los datos de un usuario autenticado
       parameters:
-        - description: ID del usuario
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: Datos a actualizar
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/dto.UpdateUserRequest"
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.UserResponse"
+            $ref: '#/definitions/dto.UserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "409":
           description: Conflict
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       security:
-        - BearerAuth: []
+      - BearerAuth: []
       summary: Actualizar usuario
       tags:
-        - users
+      - users
   /users/login:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Autentica un usuario y devuelve un token JWT
       parameters:
-        - description: Credenciales
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/dto.LoginRequest"
+      - description: Credenciales
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/dto.AuthResponse"
+            $ref: '#/definitions/dto.AuthResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       summary: Iniciar sesion
       tags:
-        - users
+      - users
   /users/register:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Crea un nuevo usuario y devuelve un token JWT
       parameters:
-        - description: Datos de registro
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/dto.RegisterRequest"
+      - description: Datos de registro
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
-        - application/json
+      - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: "#/definitions/dto.AuthResponse"
+            $ref: '#/definitions/dto.AuthResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "409":
           description: Conflict
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: "#/definitions/apperrors.ErrorResponse"
+            $ref: '#/definitions/apperrors.ErrorResponse'
       summary: Registrar usuario
       tags:
-        - users
+      - users
 securityDefinitions:
   BearerAuth:
-    description: "Ingrese el token JWT con el prefijo Bearer. Ejemplo: Bearer eyJhbGciOiJIUzI1NiIs..."
+    description: 'Ingrese el token JWT con el prefijo Bearer. Ejemplo: Bearer eyJhbGciOiJIUzI1NiIs...'
     in: header
     name: Authorization
     type: apiKey

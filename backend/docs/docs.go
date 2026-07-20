@@ -25,7 +25,7 @@ const docTemplate = `{
     "paths": {
         "/products": {
             "get": {
-                "description": "Obtiene los productos con soporte de paginaci\u00f3n. Si no se especifican par\u00e1metros, se devuelven los primeros 10 resultados.",
+                "description": "Obtiene los productos con soporte de paginación mediante query params. Si no se especifican, se devuelven los primeros 10 resultados.",
                 "produces": [
                     "application/json"
                 ],
@@ -37,7 +37,7 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "N\u00famero de p\u00e1gina (defecto: 1)",
+                        "description": "Número de página (defecto: 1)",
                         "name": "page",
                         "in": "query"
                     },
@@ -45,7 +45,7 @@ const docTemplate = `{
                         "maximum": 100,
                         "minimum": 1,
                         "type": "integer",
-                        "description": "Resultados por p\u00e1gina (defecto: 10, m\u00e1ximo: 100)",
+                        "description": "Resultados por página (defecto: 10, máximo: 100)",
                         "name": "pageSize",
                         "in": "query"
                     }
@@ -71,7 +71,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Registra un nuevo producto en el catalogo",
+                "description": "Registra un nuevo producto en el catálogo",
                 "consumes": [
                     "application/json"
                 ],
@@ -173,7 +173,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Modifica los datos de un producto existente",
+                "description": "Modifica los datos de un producto existente. Solo los campos enviados son modificados.",
                 "consumes": [
                     "application/json"
                 ],
@@ -241,7 +241,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Elimina un producto del catalogo",
+                "description": "Elimina un producto del catálogo",
                 "produces": [
                     "application/json"
                 ],
@@ -562,6 +562,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Consulta la lista de todos los usuarios (solo ADMIN)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Obtener todos los usuarios",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apperrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/login": {
             "post": {
                 "description": "Autentica un usuario y devuelve un token JWT",
@@ -852,10 +886,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "NOT_FOUND"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Recurso no encontrado"
                 }
             }
         },
@@ -945,6 +981,29 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PaginatedProductsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalItems": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ProductResponse": {
             "type": "object",
             "properties": {
@@ -1018,6 +1077,10 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "adminSecret": {
+                    "description": "opcional; si coincide con la constante crea ADMIN",
+                    "type": "string"
+                },
                 "email": {
                     "type": "string",
                     "maxLength": 120
@@ -1061,48 +1124,7 @@ const docTemplate = `{
                 },
                 "stock": {
                     "type": "integer",
-                    "minimum": 0,
-                    "description": "Nuevo stock. Si no se env\u00eda, el stock no cambia."
-                }
-            }
-        },
-        "dto.PaginatedProductsResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.ProductResponse"
-                    }
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "pageSize": {
-                    "type": "integer"
-                },
-                "totalItems": {
-                    "type": "integer"
-                },
-                "totalPages": {
-                    "type": "integer"
-                }
-            }
-        },
-        "apperrors.ValidationErrorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "minimum": 0
                 }
             }
         },
@@ -1127,6 +1149,9 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 72,
                     "minLength": 6
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -1143,6 +1168,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "lastName": {
+                    "type": "string"
+                },
+                "role": {
+                    "description": "\"CLIENT\" o \"ADMIN\"",
                     "type": "string"
                 },
                 "username": {
