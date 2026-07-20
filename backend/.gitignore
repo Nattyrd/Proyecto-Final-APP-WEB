@@ -3,7 +3,7 @@ bin/
 *.exe
 
 # Entorno
-.env
+
 
 # IDE
 .idea/
@@ -12,3 +12,6 @@ bin/
 # Sistema
 .DS_Store
 Thumbs.db
+
+
+node_modules/
