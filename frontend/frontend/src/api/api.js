@@ -82,4 +82,18 @@ export const receiptsAPI = {
   remove:       (id)     => api.delete(`/receipts/${id}`),
 };
 
+/* ──────────────────────────────────────────────── *
+ *  Users endpoints
+ * ──────────────────────────────────────────────── */
+export const usersAPI = {
+  /** GET /api/users */
+  getAll:    () => api.get('/users'),
+  /** GET /api/users/:id */
+  getById:   (id) => api.get(`/users/${id}`),
+  /** PUT /api/users/:id */
+  update:    (id, data) => api.put(`/users/${id}`, data),
+  /** DELETE /api/users/:id */
+  remove:    (id) => api.delete(`/users/${id}`),
+};
+
 export default api;

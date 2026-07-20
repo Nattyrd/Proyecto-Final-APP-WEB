@@ -101,6 +101,24 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// GetAll godoc
+// @Summary      Obtener todos los usuarios
+// @Description  Consulta la lista de todos los usuarios (solo ADMIN)
+// @Tags         users
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array} dto.UserResponse
+// @Failure      500 {object} apperrors.ErrorResponse
+// @Router       /users [get]
+func (h *UserHandler) GetAll(c *gin.Context) {
+	response, err := h.userService.GetAll(c.Request.Context())
+	if err != nil {
+		apperrors.Abort(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
+
 // Update godoc
 // @Summary      Actualizar usuario
 // @Description  Actualiza los datos de un usuario autenticado
@@ -126,7 +144,8 @@ func (h *UserHandler) Update(c *gin.Context) {
 	}
 
 	authUserID, ok := middleware.GetUserID(c)
-	if !ok || authUserID != id {
+	authRole, _ := middleware.GetRole(c)
+	if (!ok || authUserID != id) && authRole != "ADMIN" {
 		apperrors.Abort(c, apperrors.Forbidden("No puede modificar otro usuario"))
 		return
 	}
@@ -167,7 +186,8 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	}
 
 	authUserID, ok := middleware.GetUserID(c)
-	if !ok || authUserID != id {
+	authRole, _ := middleware.GetRole(c)
+	if (!ok || authUserID != id) && authRole != "ADMIN" {
 		apperrors.Abort(c, apperrors.Forbidden("No puede eliminar otro usuario"))
 		return
 	}

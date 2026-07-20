@@ -28,6 +28,12 @@ func (r *UserRepository) FindByID(ctx context.Context, id uint) (*models.User, e
 	return &user, nil
 }
 
+func (r *UserRepository) FindAll(ctx context.Context) ([]models.User, error) {
+	var users []models.User
+	err := r.db.WithContext(ctx).Find(&users).Error
+	return users, err
+}
+
 func (r *UserRepository) FindByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
 	err := r.db.WithContext(ctx).Where("username = ?", username).First(&user).Error

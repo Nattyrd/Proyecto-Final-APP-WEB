@@ -41,6 +41,7 @@ func Setup(deps Dependencies) *gin.Engine {
 		{
 			users.POST("/register", deps.UserHandler.Register)
 			users.POST("/login", deps.UserHandler.Login)
+			users.GET("", authMiddleware, adminMiddleware, deps.UserHandler.GetAll)
 			users.GET("/:id", deps.UserHandler.GetByID)
 			users.PUT("/:id", authMiddleware, deps.UserHandler.Update)
 			users.DELETE("/:id", authMiddleware, deps.UserHandler.Delete)

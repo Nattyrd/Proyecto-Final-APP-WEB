@@ -77,6 +77,13 @@ export default function Navbar() {
                   )}
                 </Link>
 
+                {/* Mis Compras (Client) */}
+                {!isAdmin && (
+                  <NavLink to="/my-orders" className={linkClass}>
+                    Mis Compras
+                  </NavLink>
+                )}
+
                 {/* Admin panel */}
                 {isAdmin && (
                   <NavLink to="/admin" className={linkClass}>

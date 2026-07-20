@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import CatalogPage  from './pages/CatalogPage';
 import CartPage     from './pages/CartPage';
 import AdminPage    from './pages/AdminPage';
+import MyOrdersPage from './pages/MyOrdersPage';
 
 export default function App() {
   return (
@@ -30,6 +31,9 @@ export default function App() {
                 {/* Auth required */}
                 <Route path="/cart" element={
                   <RequireAuth><CartPage /></RequireAuth>
+                } />
+                <Route path="/my-orders" element={
+                  <RequireAuth><MyOrdersPage /></RequireAuth>
                 } />
 
                 {/* Admin only */}

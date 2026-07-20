@@ -116,6 +116,22 @@ func (s *UserService) GetByID(ctx context.Context, id uint) (*dto.UserResponse, 
 	return &response, nil
 }
 
+func (s *UserService) GetAll(ctx context.Context) ([]dto.UserResponse, error) {
+	users, err := s.userRepo.FindAll(ctx)
+	if err != nil {
+		return nil, apperrors.Internal("No se pudieron consultar los usuarios")
+	}
+
+	var response []dto.UserResponse
+	for _, user := range users {
+		response = append(response, toUserResponse(&user))
+	}
+	if response == nil {
+		response = make([]dto.UserResponse, 0)
+	}
+	return response, nil
+}
+
 func (s *UserService) Update(ctx context.Context, id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error) {
 	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
@@ -148,6 +164,9 @@ func (s *UserService) Update(ctx context.Context, id uint, req dto.UpdateUserReq
 			return nil, apperrors.Internal("No se pudo cifrar la contrasena")
 		}
 		user.Password = string(hashedPassword)
+	}
+	if req.Role != "" {
+		user.Role = req.Role
 	}
 
 	if err := s.userRepo.Update(ctx, user); err != nil {

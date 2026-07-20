@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomePage() {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -8,17 +8,12 @@ export default function HomePage() {
     <div className="page-wrapper">
       {/* Hero */}
       <section className="text-center py-16 animate-fade-in">
-        <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 text-xs font-semibold
-                        px-3 py-1 rounded-full border border-primary-200 mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
-          Plataforma E-Commerce · Grupo 5
-        </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-corporate-900 mb-4">
           Bienvenido a <span className="text-primary-700">ShopCorp</span>
         </h1>
         <p className="text-corporate-500 max-w-md mx-auto mb-8">
-          Explora nuestro catálogo, gestiona tu carrito y realiza tus pedidos
-          de forma rápida y segura.
+          Explora nuestro catálogo, gestiona tu carrito y realiza tus pedidos de
+          forma rápida y segura.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Link to="/catalog" className="btn btn-primary btn-lg">
@@ -41,19 +36,16 @@ export default function HomePage() {
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-4">
         {[
           {
-            icon: '🛒',
-            title: 'Catálogo completo',
-            desc: 'Navega nuestra selección de productos con filtros y paginación.',
+            title: "Catálogo completo",
+            desc: "Navega nuestra selección de productos con filtros y paginación.",
           },
           {
-            icon: '🔒',
-            title: 'Compra segura',
-            desc: 'Autenticación JWT y manejo de roles para máxima seguridad.',
+            title: "Compra segura",
+            desc: "Autenticación JWT y manejo de roles para máxima seguridad.",
           },
           {
-            icon: '📄',
-            title: 'Recibos instantáneos',
-            desc: 'Al finalizar tu compra recibes tu comprobante de forma inmediata.',
+            title: "Recibos instantáneos",
+            desc: "Al finalizar tu compra recibes tu comprobante de forma inmediata.",
           },
         ].map((f) => (
           <div key={f.title} className="card p-6 text-center animate-fade-in">

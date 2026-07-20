@@ -19,6 +19,7 @@ type UpdateUserRequest struct {
 	FirstName string `json:"firstName" binding:"omitempty,min=2,max=80"`
 	LastName  string `json:"lastName" binding:"omitempty,min=2,max=80"`
 	Password  string `json:"password" binding:"omitempty,min=6,max=72"`
+	Role      string `json:"role" binding:"omitempty"`
 }
 
 type AuthResponse struct {
