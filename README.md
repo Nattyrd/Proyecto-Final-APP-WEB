@@ -44,7 +44,7 @@ scripts/              -> Script inicial de base de datos
 1. Copiar variables de entorno:
 
 ```bash
-cp .env.example .env
+cp .env //Variable para crear administrador secret para crear usuarios administrador.
 ```
 
 2. Levantar PostgreSQL con Docker:
@@ -65,6 +65,16 @@ go mod tidy
 go install github.com/swaggo/swag/cmd/swag@latest
 swag init -g cmd/api/main.go -o docs
 ```
+5. Inicializar Docker y Go
+```bash
+
+cd backend
+docker-compose up -d postgres
+
+correr Proyecto 
+go run cmd/api/main.go
+```
+
 
 5. Ejecutar la API:
 
